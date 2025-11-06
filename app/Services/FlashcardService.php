@@ -51,12 +51,17 @@ class FlashcardService
         $masteredCount = UserTranslationProgress::where('user_id', $userId)
             ->where('score', '>=', 3)
             ->count();
-
+        $twotime = UserTranslationProgress::where('user_id', $userId)
+            ->where('score', '=', 2)
+            ->count();
+        $onetime = UserTranslationProgress::where('user_id', $userId)
+            ->where('score', '=', 1)
+            ->count();
         return [
             'total_translations' => $totalTranslations,
             'mastered' => $masteredCount,
             'percentage' => $totalTranslations ? 
-                round(($masteredCount * 100) / $totalTranslations, 2) : 0
+                round((($masteredCount+$twotime+$onetime) * 100) / ($totalTranslations *3), 2) : 0
         ];
     }
 }
