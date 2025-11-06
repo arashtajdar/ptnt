@@ -1,35 +1,33 @@
-# Use official PHP image with necessary extensions
-FROM php:8.3-fpm
+# Stage 1: Build PHP backend
+FROM php:8.3-fpm AS backend
 
-# Set working directory
 WORKDIR /var/www
 
-# Install system dependencies
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libzip-dev \
-    zip \
-    curl \
+    git unzip libpng-dev libjpeg-dev libfreetype6-dev libzip-dev zip curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl gd
+    && docker-php-ext-install pdo pdo_mysql gd mbstring zip exif pcntl opcache
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy project files
+# Copy and install Laravel dependencies
 COPY . .
+RUN composer install --no-dev --optimize-autoloader \
+    && php artisan key:generate \
+    && chown -R www-data:www-data storage bootstrap/cache
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Stage 2: Nginx serving PHP-FPM
+FROM nginx:stable-alpine
 
-# Set permissions for Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Copy Nginx configuration
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 9000 and start php-fpm
+# Copy application files from backend stage
+COPY --from=backend /var/www /var/www
+
+# Expose port 80 for Railway
 EXPOSE 80
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
+
+CMD ["nginx", "-g", "daemon off;"]
