@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Progress routes
     Route::get('/me/progress', [ProgressController::class, 'show']);
     Route::get('/me/flashcards-responded', [FlashcardController::class, 'responded']);
+    Route::get('/me/profile', [\App\Http\Controllers\Api\ProfileController::class, 'show']);
 
     // Flashcard routes
     Route::prefix('flashcards')->group(function () {
