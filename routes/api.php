@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Question routes
     Route::prefix('questions')->group(function () {
         Route::get('/', [QuestionController::class, 'index']);
+        Route::get('/images/list', [QuestionController::class, 'imagesList']);
         Route::get('/{question}', [QuestionController::class, 'show']);
     });
 

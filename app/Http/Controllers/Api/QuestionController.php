@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Repositories\QuestionRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class QuestionController extends Controller
 {
@@ -101,5 +102,36 @@ class QuestionController extends Controller
     {
         $question->delete();
         return response()->json(null, 204);
+    }
+
+    /**
+     * List all images with their related questions
+     * Optimized with caching and efficient queries
+     */
+    public function imagesList(): JsonResponse
+    {
+        // Cache for 1 hour (3600 seconds)
+        $cacheKey = 'questions_images_list';
+        $cacheTTL = 3600;
+
+        $images = Cache::remember($cacheKey, $cacheTTL, function () {
+            // Use groupBy to fetch all questions in one query, then group by image
+            $questions = Question::whereNotNull('image')
+                ->select(['id', 'text', 'image', 'answer', 'parent_number', 'question_number'])
+                ->get()
+                ->groupBy('image');
+
+            return $questions->map(function ($items, $image) {
+                return [
+                    'image' => $image,
+                    'questions' => $items->values()->toArray()
+                ];
+            })->values();
+        });
+
+        return response()->json([
+            'total_images' => $images->count(),
+            'images' => $images
+        ]);
     }
 }
