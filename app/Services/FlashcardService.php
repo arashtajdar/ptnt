@@ -43,6 +43,14 @@ class FlashcardService
     }
 
     /**
+     * Get flashcards that the user has responded to
+     */
+    public function getRespondedCards(int $userId)
+    {
+        return $this->translationRepository->getResponded($userId);
+    }
+
+    /**
      * Compute overall progress
      */
     public function computeProgress(int $userId): array

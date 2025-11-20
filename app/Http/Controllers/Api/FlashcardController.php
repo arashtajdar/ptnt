@@ -58,6 +58,15 @@ class FlashcardController extends Controller
     }
 
     /**
+     * Get flashcards that the user has responded to
+     */
+    public function responded(Request $request): JsonResponse
+    {
+        $cards = $this->flashcardService->getRespondedCards($request->user()->id);
+        return response()->json($cards);
+    }
+
+    /**
      * List all flashcards
      */
     public function index(Request $request): JsonResponse

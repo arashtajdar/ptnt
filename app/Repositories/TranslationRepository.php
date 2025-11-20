@@ -54,6 +54,22 @@ class TranslationRepository{
     }
 
     /**
+     * Get translations that the user has responded to
+     */
+    public function getResponded(int $userId): Collection
+    {
+        return Translation::query()
+            ->join('user_translation_progress as progress', function ($join) use ($userId) {
+                $join->on('translations.id', '=', 'progress.translation_id')
+                    ->where('progress.user_id', '=', $userId);
+            })
+            ->where('progress.attempts', '>', 0)
+            ->select('translations.*', 'progress.score', 'progress.attempts', 'progress.last_attempt_at')
+            ->orderByDesc('progress.last_attempt_at')
+            ->get();
+    }
+
+    /**
      * Update translation progress
      */
     public function updateProgress(int $userId, int $translationId, string $result): UserTranslationProgress
