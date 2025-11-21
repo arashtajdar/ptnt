@@ -13,10 +13,10 @@ COPY . .
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
 # Fix permissions
-RUN chown -R webuser:webgroup /var/www/html
+RUN chown -R www-data:www-data /var/www/html
 
 # Switch back to the non-root user
-USER webuser
+USER www-data
 
 # Expose port 8080 (default for this image)
 EXPOSE 8080
