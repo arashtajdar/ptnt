@@ -22,4 +22,20 @@ class ProfileController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Update user preferences
+     */
+    public function updatePreferences(Request $request)
+    {
+        $validated = $request->validate([
+            'show_farsi' => 'required|boolean'
+        ]);
+        
+        $request->user()->update($validated);
+        
+        return response()->json([
+            'user' => $request->user()->fresh()
+        ]);
+    }
 }

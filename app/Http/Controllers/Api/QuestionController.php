@@ -66,6 +66,7 @@ class QuestionController extends Controller
     {
         $validated = $request->validate([
             'text' => 'required|string',
+            'text_fa' => 'nullable|string',
             'image' => 'nullable|string',
             'answer' => 'required|in:V,F,v,f',
             'parent_number' => 'required|integer',
@@ -84,6 +85,7 @@ class QuestionController extends Controller
     {
         $validated = $request->validate([
             'text' => 'required|string',
+            'text_fa' => 'nullable|string',
             'image' => 'nullable|string',
             'answer' => 'required|in:V,F,v,f',
             'parent_number' => 'required|integer',

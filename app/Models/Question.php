@@ -12,6 +12,7 @@ class Question extends Model
 
     protected $fillable = [
         'text',
+        'text_fa',
         'image',
         'answer',
         'parent_number',
