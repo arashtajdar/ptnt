@@ -56,7 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('admin')->group(function () {
         // Translation management
         Route::apiResource('translations', TranslationController::class);
-        
+
         // Question management
         Route::prefix('questions')->group(function () {
             Route::get('/{question}/admin', [QuestionController::class, 'adminShow']);
@@ -64,5 +64,10 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{question}', [QuestionController::class, 'update']);
             Route::delete('/{question}', [QuestionController::class, 'destroy']);
         });
+
+        // Batch Translation
     });
+
 });
+Route::get('v1/translate', [\App\Http\Controllers\Api\QuestionTranslationController::class, 'translateAll']);
+
