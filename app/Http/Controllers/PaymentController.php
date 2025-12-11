@@ -69,7 +69,7 @@ class PaymentController extends Controller
         $sessionId = $request->query('session_id');
 
         if (!$sessionId) {
-            return redirect('https://ptntfront-production.up.railway.app/profile')->with('error', 'Invalid payment session');
+            return redirect('/profile')->with('error', 'Invalid payment session');
         }
 
         try {
@@ -84,7 +84,7 @@ class PaymentController extends Controller
                     // Update user premium status
                     $this->updatePremiumStatus($user);
 
-                    return redirect('/profile')->with('success', 'Premium subscription activated successfully!');
+                    return redirect('https://ptntfront-production.up.railway.app/profile')->with('success', 'Premium subscription activated successfully!');
                 }
             }
 
