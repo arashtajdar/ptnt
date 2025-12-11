@@ -68,6 +68,11 @@ Route::middleware('auth:sanctum')->group(function () {
         // Batch Translation
     });
 
+    // Payment routes
+    Route::prefix('payment')->group(function () {
+        Route::post('/create-checkout-session', [\App\Http\Controllers\PaymentController::class, 'createCheckoutSession']);
+    });
+
 });
 Route::get('v1/translate', [\App\Http\Controllers\Api\QuestionTranslationController::class, 'translateAll']);
 
