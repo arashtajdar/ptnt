@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Services\OllamaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class QuestionTranslationController extends Controller
 {
@@ -30,9 +31,11 @@ class QuestionTranslationController extends Controller
         // You can remove ->whereNull statements if you want to re-translate everything
         $questions = Question::whereNull('text_fa')
             ->orWhere('text_fa', '')
+            ->limit(100)
             ->get();
 
         foreach ($questions as $question) {
+            Log::debug('Translating question id started: ' . $question->id);
             if (empty($question->text)) {
                 continue;
             }
@@ -46,6 +49,7 @@ class QuestionTranslationController extends Controller
             } else {
                 $errors++;
             }
+            Log::debug('Translating question id finished: ' . $question->id);
         }
 
         return response()->json([

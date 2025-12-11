@@ -14,7 +14,7 @@ class OllamaService
     {
         $this->baseUrl = env('OLLAMA_URL', 'http://127.0.0.1:11434');
         // Default to llama3 or user can configure. Using a safe default if not set.
-        $this->model = env('OLLAMA_MODEL', 'mshojaei77/gemma3persian');
+        $this->model = env('OLLAMA_MODEL', 'qwen3-vl:235b-cloud');
     }
 
     /**
