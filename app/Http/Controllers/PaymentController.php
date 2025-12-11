@@ -69,7 +69,7 @@ class PaymentController extends Controller
         $sessionId = $request->query('session_id');
 
         if (!$sessionId) {
-            return redirect('/profile')->with('error', 'Invalid payment session');
+            return redirect('https://ptntfront-production.up.railway.app/profile')->with('error', 'Invalid payment session');
         }
 
         try {
