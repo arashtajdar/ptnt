@@ -22,7 +22,7 @@ class QuestionTranslationController extends Controller
     public function translateAll(Request $request): JsonResponse
     {
         // Increase time limit for this long running process
-        set_time_limit(600);
+        set_time_limit(1800);
 
         $counter = 0;
         $errors = 0;
@@ -31,7 +31,7 @@ class QuestionTranslationController extends Controller
         // You can remove ->whereNull statements if you want to re-translate everything
         $questions = Question::whereNull('text_fa')
             ->orWhere('text_fa', '')
-            ->limit(100)
+            ->limit(33)
             ->get();
 
         foreach ($questions as $question) {
