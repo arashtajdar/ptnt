@@ -19,6 +19,13 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
+// Verification routes
+Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Api\VerificationController::class, 'verify'])
+    ->middleware(['signed'])
+    ->name('verification.verify');
+
+Route::post('/email/resend', [\App\Http\Controllers\Api\VerificationController::class, 'resend']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // User info

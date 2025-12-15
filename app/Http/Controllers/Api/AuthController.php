@@ -30,6 +30,12 @@ class AuthController extends Controller
             ]);
         }
 
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Your email address is not verified.'
+            ], 403);
+        }
+
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
@@ -51,19 +57,18 @@ class AuthController extends Controller
                 'is_admin' => false, // Default to non-admin user
             ]);
 
-            $token = $user->createToken('api-token')->plainTextToken;
+            \Illuminate\Auth\Events\Registered::dispatch($user);
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Registration successful',
+                'message' => 'Registration successful. Please check your email to verify your account.',
                 'data' => [
                     'user' => [
                         'id' => $user->id,
                         'name' => $user->name,
                         'email' => $user->email,
                         'created_at' => $user->created_at,
-                    ],
-                    'token' => $token
+                    ]
                 ]
             ], 201);
         } catch (\Exception $e) {
