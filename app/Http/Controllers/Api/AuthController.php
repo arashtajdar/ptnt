@@ -57,7 +57,7 @@ class AuthController extends Controller
                 'is_admin' => false, // Default to non-admin user
             ]);
 
-            \Illuminate\Auth\Events\Registered::dispatch($user);
+            event(new \Illuminate\Auth\Events\Registered($user));
 
             return response()->json([
                 'status' => 'success',
