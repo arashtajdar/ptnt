@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => 'log', // Forced to log as per user request for simplest implementation
 
     /*
     |--------------------------------------------------------------------------
