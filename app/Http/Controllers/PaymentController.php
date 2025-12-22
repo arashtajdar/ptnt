@@ -14,7 +14,7 @@ class PaymentController extends Controller
     public function __construct()
     {
         // Set Stripe API key
-        Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
+        Stripe::setApiKey(config('services.stripe.secret'));
     }
 
     /**
@@ -109,7 +109,7 @@ class PaymentController extends Controller
     {
         $payload = $request->getContent();
         $sigHeader = $request->header('Stripe-Signature');
-        $webhookSecret = env('STRIPE_WEBHOOK_SECRET');
+        $webhookSecret = config('services.stripe.webhook_secret');
 
         try {
             $event = \Stripe\Webhook::constructEvent(
