@@ -84,7 +84,7 @@ class PaymentController extends Controller
                     // Update user premium status
                     $this->updatePremiumStatus($user);
 
-                    return redirect('https://ptntfront-production.up.railway.app/profile')->with('success', 'Premium subscription activated successfully!');
+                    return redirect(env('FRONTEND_URL', 'https://ptntfront-production.up.railway.app') . '/profile')->with('success', 'Premium subscription activated successfully!');
                 }
             }
 
