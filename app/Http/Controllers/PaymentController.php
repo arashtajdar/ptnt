@@ -69,7 +69,7 @@ class PaymentController extends Controller
         $sessionId = $request->query('session_id');
 
         if (!$sessionId) {
-            return redirect('/profile')->with('error', 'Invalid payment session');
+            return redirect(env('FRONTEND_URL', 'https://ptntfront-production.up.railway.app') . '/profile')->with('error', 'Invalid payment session');
         }
 
         try {
@@ -77,20 +77,15 @@ class PaymentController extends Controller
             $session = Session::retrieve($sessionId);
 
             if ($session->payment_status === 'paid') {
-                $userId = $session->metadata->user_id;
-                $user = User::find($userId);
-
-                if ($user) {
-                    // Update user premium status
-                    $this->updatePremiumStatus($user);
-
-                    return redirect(env('FRONTEND_URL', 'https://ptntfront-production.up.railway.app') . '/profile')->with('success', 'Premium subscription activated successfully!');
-                }
+                $status = $this->processPayment($session);
+                
+                $redirectUrl = env('FRONTEND_URL', 'https://ptntfront-production.up.railway.app') . '/profile?payment_success=1';
+                return redirect($redirectUrl)->with('success', 'Premium subscription activated successfully!');
             }
 
-            return redirect('/profile')->with('error', 'Payment verification failed');
+            return redirect(env('FRONTEND_URL', 'https://ptntfront-production.up.railway.app') . '/profile')->with('error', 'Payment verification failed');
         } catch (\Exception $e) {
-            return redirect('/profile')->with('error', 'Payment processing error: ' . $e->getMessage());
+            return redirect(env('FRONTEND_URL', 'https://ptntfront-production.up.railway.app') . '/profile')->with('error', 'Payment processing error: ' . $e->getMessage());
         }
     }
 
@@ -99,7 +94,7 @@ class PaymentController extends Controller
      */
     public function cancel()
     {
-        return redirect('/profile')->with('info', 'Payment cancelled');
+        return redirect(env('FRONTEND_URL', 'https://ptntfront-production.up.railway.app') . '/profile')->with('info', 'Payment cancelled');
     }
 
     /**
@@ -123,12 +118,7 @@ class PaymentController extends Controller
                 $session = $event->data->object;
 
                 if ($session->payment_status === 'paid') {
-                    $userId = $session->metadata->user_id;
-                    $user = User::find($userId);
-
-                    if ($user) {
-                        $this->updatePremiumStatus($user);
-                    }
+                    $this->processPayment($session);
                 }
             }
 
@@ -136,6 +126,40 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
+    }
+
+    /**
+     * Process the payment and update user status
+     * Returns true if processed now, false if already processed
+     */
+    private function processPayment($session)
+    {
+        // Check if this session was already processed
+        $existingPayment = \App\Models\Payment::where('stripe_session_id', $session->id)->first();
+        if ($existingPayment) {
+            return false;
+        }
+
+        $userId = $session->metadata->user_id;
+        $user = User::find($userId);
+
+        if (!$user) {
+            throw new \Exception("User not found for ID: {$userId}");
+        }
+
+        // Create payment record
+        \App\Models\Payment::create([
+            'user_id' => $user->id,
+            'stripe_session_id' => $session->id,
+            'amount' => $session->amount_total,
+            'currency' => $session->currency,
+            'status' => $session->payment_status,
+        ]);
+
+        // Update user premium status
+        $this->updatePremiumStatus($user);
+
+        return true;
     }
 
     /**
