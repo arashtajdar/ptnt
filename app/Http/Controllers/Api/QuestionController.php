@@ -132,11 +132,24 @@ class QuestionController extends Controller
         $images = Cache::remember($cacheKey, $cacheTTL, function () {
             // Use groupBy to fetch all questions in one query, then group by image
             $questions = Question::whereNotNull('image')
-                ->select(['id', 'text', 'image', 'answer', 'parent_number', 'question_number'])
-                ->get()
-                ->groupBy('image');
+                ->select(['id', 'text', 'image', 'answer', 'parent_number', 'question_number', 'translation_ids'])
+                ->get();
 
-            return $questions->map(function ($items, $image) {
+            // Load translations for the matched phrases
+            $allTranslationIds = $questions->pluck('translation_ids')->flatten()->unique()->filter()->toArray();
+            $translations = \App\Models\Translation::whereIn('id', $allTranslationIds)->get(['id', 'text_it', 'text_en', 'text_fa']);
+
+            foreach ($questions as $question) {
+                if ($question->translation_ids) {
+                    $question->translations = $translations->whereIn('id', $question->translation_ids)->values();
+                } else {
+                    $question->translations = [];
+                }
+            }
+
+            $grouped = $questions->groupBy('image');
+
+            return $grouped->map(function ($items, $image) {
                 return [
                     'image' => $image,
                     'questions' => $items->values()->toArray()
