@@ -16,9 +16,13 @@ class QuizService
     /**
      * Generate a new quiz
      */
-    public function generate(int $count = 30)
+    public function generate(int $userId, int $count = 30, ?string $type = null)
     {
-        $questions = $this->questionRepository->getRandom($count);
+        if ($type === 'wrong' || $type === 'never_answered') {
+            $questions = $this->questionRepository->getRandomFiltered($userId, $count, $type);
+        } else {
+            $questions = $this->questionRepository->getRandom($count);
+        }
 
         // Load translations for the matched phrases
         $allTranslationIds = $questions->pluck('translation_ids')->flatten()->unique()->filter()->toArray();

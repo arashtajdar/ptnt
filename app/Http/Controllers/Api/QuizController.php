@@ -11,16 +11,23 @@ class QuizController extends Controller
 {
     public function __construct(
         private QuizService $quizService
-    ) {}
+    ) {
+    }
 
     /**
      * Generate a new quiz
      */
     public function generate(Request $request): JsonResponse
     {
-        $count = (int)$request->query('count', 30);
+        $count = (int) $request->query('count', 30);
+        $type = $request->query('type');
+
         return response()->json(
-            $this->quizService->generate($count)
+            $this->quizService->generate(
+                $request->user()->id,
+                $count,
+                $type
+            )
         );
     }
 

@@ -33,6 +33,24 @@ class QuestionRepository
     }
 
     /**
+     * Get random filtered questions (wrong answers, never answered, etc.)
+     */
+    public function getRandomFiltered(int $userId, int $count = 30, ?string $type = null): Collection
+    {
+        $filterStats = null;
+        if ($type === 'wrong') {
+            $filterStats = 'wrong';
+        } elseif ($type === 'never_answered') {
+            $filterStats = 'none';
+        }
+
+        return $this->baseQueryWithStats($userId, null, $filterStats)
+            ->inRandomOrder()
+            ->limit($count)
+            ->get();
+    }
+
+    /**
      * Get a single question with stats
      */
     public function getWithStats(int $questionId, int $userId): ?Question
