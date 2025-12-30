@@ -10,14 +10,30 @@ class QuizService
 {
     public function __construct(
         private QuestionRepository $questionRepository
-    ) {}
+    ) {
+    }
 
     /**
      * Generate a new quiz
      */
     public function generate(int $count = 30)
     {
-        return $this->questionRepository->getRandom($count);
+        $questions = $this->questionRepository->getRandom($count);
+
+        // Load translations for the matched phrases
+        $allTranslationIds = $questions->pluck('translation_ids')->flatten()->unique()->filter()->toArray();
+        $translations = \App\Models\Translation::whereIn('id', $allTranslationIds)->get(['id', 'text_it', 'text_en', 'text_fa']);
+
+        foreach ($questions as $question) {
+            if ($question->translation_ids) {
+                // Attach the full translation objects that match this question
+                $question->translations = $translations->whereIn('id', $question->translation_ids)->values();
+            } else {
+                $question->translations = [];
+            }
+        }
+
+        return $questions;
     }
 
     /**
@@ -29,7 +45,8 @@ class QuizService
 
         DB::transaction(function () use ($userId, $questionIds, $answers, &$stats) {
             foreach ($questionIds as $index => $questionId) {
-                if (!isset($answers[$index])) continue;
+                if (!isset($answers[$index]))
+                    continue;
 
                 $stat = UserQuestionStat::firstOrNew([
                     'user_id' => $userId,

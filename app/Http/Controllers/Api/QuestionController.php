@@ -13,25 +13,38 @@ class QuestionController extends Controller
 {
     public function __construct(
         private QuestionRepository $questionRepository
-    ) {}
+    ) {
+    }
 
     /**
      * List questions with pagination and filters
      */
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int)$request->query('per_page', 10);
+        $perPage = (int) $request->query('per_page', 10);
         $search = $request->query('search');
         $filterStats = $request->query('filter_stats');
 
-        return response()->json(
-            $this->questionRepository->getPaginatedWithStats(
-                $request->user()->id,
-                $search,
-                $filterStats,
-                $perPage
-            )
+        $questions = $this->questionRepository->getPaginatedWithStats(
+            $request->user()->id,
+            $search,
+            $filterStats,
+            $perPage
         );
+
+        // Load translations for the matched phrases
+        $allTranslationIds = collect($questions->items())->pluck('translation_ids')->flatten()->unique()->filter()->toArray();
+        $translations = \App\Models\Translation::whereIn('id', $allTranslationIds)->get(['id', 'text_it', 'text_en', 'text_fa']);
+
+        foreach ($questions as $question) {
+            if ($question->translation_ids) {
+                $question->translations = $translations->whereIn('id', $question->translation_ids)->values();
+            } else {
+                $question->translations = [];
+            }
+        }
+
+        return response()->json($questions);
     }
 
     /**

@@ -41,8 +41,8 @@ class UpdateQuestionTranslations extends Command
             $questionText = $question->text;
 
             foreach ($translations as $translation) {
-                // Use str_contains for exact phrase matching
-                if (str_contains($questionText, $translation->text_it)) {
+                // Use mb_stripos for case-insensitive phrase matching
+                if (mb_stripos($questionText, $translation->text_it) !== false) {
                     $matchedIds[] = $translation->id;
                 }
             }
