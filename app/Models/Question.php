@@ -16,7 +16,12 @@ class Question extends Model
         'image',
         'answer',
         'parent_number',
-        'question_number'
+        'question_number',
+        'translation_ids'
+    ];
+
+    protected $casts = [
+        'translation_ids' => 'array'
     ];
 
     /**
